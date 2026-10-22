@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>QORVEX — BB84 Simulation</title>
+<style>
+:root {
+  --site-primary: #102b3a;
+  --site-secondary: #d7e8e5;
+  --site-background: #f3f6f5;
+  --site-on-primary: #ffffff;
+  --site-on-secondary: #173746;
+  --site-on-background: #152b35;
+  --site-font-body: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --site-font-heading: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --site-heading-scale: 1;
+  --site-spacing-scale: 1;
+  --site-radius-scale: 1;
+  --site-decoration-opacity: 1;
+  --ink: #18313b;
+  --muted: #6a7d83;
+  --line: #dce6e5;
+  --surface: #ffffff;
+  --teal: #4f9c91;
+  --teal-soft: #e5f3ef;
+  --red: #b94c4c;
+  --red-soft: #fae9e7;
+  --amber: #9a722c;
+  --amber-soft: #f8f0dc;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: var(--site-font-body); background: light-dark(#f3f6f5, #101b20); color: var(--ink); }
+#app { min-height: 100vh; width: 100%; border-radius: 0; background: var(--site-background); color: var(--site-on-background); }
+button, select, input { font: inherit; }
+button { cursor: pointer; }
+.topbar { background: var(--site-primary); color: var(--site-on-primary); padding: 18px clamp(18px, 4vw, 54px); display:flex; justify-content:space-between; align-items:center; gap:20px; }
+.brand { display:flex; align-items:center; gap:12px; font-weight:800; letter-spacing:.16em; font-size:15px; }
+.brandmark { width:34px; height:34px; border:1px solid #8fc7bc; color:#a8d8ce; border-radius:10px; display:grid; place-items:center; font-size:17px; }
+.top-meta { color:#c6d8d9; font-size:12px; letter-spacing:.08em; display:flex; align-items:center; gap:10px; }
+.live-dot { width:7px; height:7px; border-radius:50%; background:#80d0b8; box-shadow:0 0 0 4px #ffffff15; }
+.shell { max-width:1400px; margin:auto; padding:30px clamp(16px, 3vw, 42px) 44px; }
+.eyebrow { font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--teal); font-weight:800; }
+.hero { display:flex; justify-content:space-between; align-items:flex-end; gap:24px; margin-bottom:26px; }
+h1 { font-size:clamp(29px, 3.4vw, 44px); letter-spacing:-.045em; line-height:1.08; margin:8px 0 10px; color:#173541; }
+.subtitle { max-width:700px; color:var(--muted); font-size:14px; line-height:1.65; margin:0; }
+.run-state { border:1px solid var(--line); background:var(--surface); padding:12px 15px; border-radius:14px; min-width:155px; }
+.run-state small { display:block; color:var(--muted); font-size:10px; letter-spacing:.1em; text-transform:uppercase; margin-bottom:6px; }
+.state-line { display:flex; gap:8px; align-items:center; font-size:13px; font-weight:750; }
+.state-pill { width:8px; height:8px; border-radius:50%; background:#9baeb1; }
+.layout { display:grid; grid-template-columns:minmax(260px, 320px) minmax(0, 1fr); gap:20px; align-items:start; }
+.panel { background:var(--surface); border:1px solid var(--line); border-radius:18px; overflow:hidden; box-shadow:0 8px 28px #18313b08; }
+.panel-head { padding:18px 20px 14px; border-bottom:1px solid #edf1f0; display:flex; justify-content:space-between; align-items:center; gap:10px; }
+.panel-title { font-size:13px; font-weight:800; letter-spacing:.01em; }
+.panel-kicker { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; }
+.controls { padding:20px; }
+.field { margin-bottom:19px; }
+.field label { display:block; font-size:12px; font-weight:750; margin-bottom:8px; }
+.field select { width:100%; padding:11px 12px; border:1px solid #d7e2e0; border-radius:10px; color:var(--ink); background:#fbfdfc; outline-color:var(--teal); }
+.help { color:var(--muted); font-size:11px; line-height:1.5; margin-top:7px; }
+.toggle-row { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:13px 0; border-top:1px solid #edf1f0; }
+.toggle-copy strong { display:block; font-size:12px; }
+.toggle-copy span { display:block; color:var(--muted); font-size:11px; margin-top:4px; line-height:1.4; }
+.switch { appearance:none; width:40px; height:23px; border-radius:99px; background:#cbd7d6; position:relative; flex-shrink:0; transition:.2s; outline-offset:3px; }
+.switch:before { content:""; position:absolute; width:17px; height:17px; top:3px; left:3px; background:white; border-radius:50%; transition:.2s; box-shadow:0 1px 3px #0002; }
+.switch:checked { background:var(--teal); }
+.switch:checked:before { left:20px; }
+.range-row { display:flex; align-items:center; justify-content:space-between; font-size:12px; margin-bottom:8px; }
+.range-row output { color:var(--teal); font-weight:800; }
+input[type=range] { width:100%; accent-color:var(--teal); }
+.primary-btn { width:100%; border:0; border-radius:11px; padding:13px 15px; background:var(--site-primary); color:white; font-weight:800; font-size:13px; margin-top:8px; box-shadow:0 6px 16px #102b3a20; transition:transform .15s, background .15s; }
+.primary-btn:hover { transform:translateY(-1px); background:#1b4656; }
+.secondary-btn { border:1px solid var(--line); border-radius:9px; padding:8px 11px; background:white; color:var(--ink); font-size:11px; font-weight:700; }
+.maincol { display:grid; gap:20px; min-width:0; }
+.metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
+.metric { background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:16px; min-width:0; }
+.metric .label { font-size:10px; text-transform:uppercase; letter-spacing:.09em; color:var(--muted); font-weight:750; }
+.metric .value { font-size:clamp(22px,2.5vw,31px); letter-spacing:-.04em; font-weight:800; margin:8px 0 4px; color:#173541; }
+.metric .note { font-size:10px; color:var(--muted); line-height:1.4; }
+.sim-panel { padding:20px; }
+.sim-top { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:20px; }
+.sim-top h2 { font-size:16px; margin:0 0 5px; }
+.sim-top p { margin:0; color:var(--muted); font-size:12px; line-height:1.5; }
+.legend { display:flex; gap:12px; flex-wrap:wrap; font-size:10px; color:var(--muted); }
+.legend span { display:flex; align-items:center; gap:5px; }
+.legend i { width:7px; height:7px; border-radius:2px; display:inline-block; }
+.flow { display:grid; grid-template-columns:1fr 42px 1fr 42px 1fr; gap:7px; align-items:center; margin-bottom:18px; }
+.node { border:1px solid var(--line); border-radius:13px; padding:14px 12px; background:#fbfdfc; text-align:center; min-width:0; }
+.node .node-icon { font-size:20px; margin-bottom:8px; color:var(--teal); }
+.node strong { display:block; font-size:12px; }
+.node small { display:block; color:var(--muted); font-size:10px; margin-top:5px; line-height:1.4; }
+.arrow { text-align:center; color:#91a8a8; font-size:20px; }
+.arrow.attack { color:var(--red); }
+.bit-track { border:1px solid var(--line); border-radius:12px; padding:14px; background:#fafcfb; }
+.track-head { display:flex; justify-content:space-between; gap:12px; align-items:center; margin-bottom:12px; }
+.track-head strong { font-size:12px; }
+.track-head span { color:var(--muted); font-size:10px; }
+.bits { display:grid; grid-template-columns:repeat(16,minmax(0,1fr)); gap:5px; }
+.bit { min-height:42px; border-radius:7px; border:1px solid #dce6e5; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; background:white; font-size:12px; font-weight:800; color:#234652; position:relative; }
+.bit small { font-size:8px; font-weight:600; color:#829395; }
+.bit.match { background:var(--teal-soft); border-color:#b7ddd3; }
+.bit.error { background:var(--red-soft); border-color:#e8b9b5; color:#a63f3f; }
+.bit.discard { opacity:.35; background:#f0f2f1; }
+.bit.sample { outline:2px solid #d7b66e; outline-offset:-2px; }
+.track-legend { display:flex; gap:13px; flex-wrap:wrap; font-size:10px; color:var(--muted); margin-top:11px; }
+.track-legend i { display:inline-block; width:8px; height:8px; border-radius:2px; margin-right:5px; }
+.bottom-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.qber-body { padding:19px 20px 20px; }
+.qber-line { display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:12px; }
+.qber-line strong { font-size:13px; }
+.qber-line span { font-size:23px; font-weight:850; letter-spacing:-.04em; }
+.gauge { height:10px; border-radius:99px; background:#e9efed; position:relative; overflow:visible; margin:20px 0 10px; }
+.gauge-fill { height:100%; width:0%; border-radius:99px; background:var(--teal); transition:width .5s; }
+.threshold-mark { position:absolute; top:-5px; bottom:-5px; width:2px; background:#a67a2d; }
+.gauge-labels { display:flex; justify-content:space-between; color:var(--muted); font-size:10px; }
+.decision { border-radius:12px; padding:13px; display:flex; gap:11px; align-items:flex-start; margin-top:18px; background:#f0f4f3; }
+.decision.pass { background:var(--teal-soft); }
+.decision.abort { background:var(--red-soft); }
+.decision.insufficient { background:var(--amber-soft); }
+.decision-icon { font-size:19px; }
+.decision strong { font-size:12px; display:block; margin-bottom:4px; }
+.decision p { font-size:11px; line-height:1.55; color:#52676d; margin:0; }
+.log { padding:8px 20px 17px; }
+.log-item { display:grid; grid-template-columns:52px 10px 1fr; gap:9px; align-items:start; padding:11px 0; border-bottom:1px solid #edf1f0; font-size:11px; }
+.log-item:last-child { border-bottom:0; }
+.log-time { color:#8b9b9d; font-variant-numeric:tabular-nums; }
+.log-dot { width:7px; height:7px; border-radius:50%; background:var(--teal); margin-top:3px; }
+.log-dot.red { background:var(--red); }
+.log-dot.amber { background:#c29a48; }
+.log-copy strong { display:block; font-size:11px; margin-bottom:3px; }
+.log-copy span { color:var(--muted); line-height:1.45; display:block; }
+.footnote { color:#7a8c8e; font-size:10px; line-height:1.6; margin:20px 3px 0; }
+.payment-panel { margin-top:20px; }
+.payment-body { padding:20px; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:18px; align-items:center; }
+.payment-amount { font-size:27px; font-weight:850; letter-spacing:-.04em; color:#173541; margin:5px 0; }
+.payment-copy { color:var(--muted); font-size:12px; line-height:1.55; }
+.payment-status { border:1px solid var(--line); background:#f0f4f3; border-radius:12px; padding:13px 15px; min-width:210px; }
+.payment-status strong { display:block; font-size:12px; margin-bottom:5px; }
+.payment-status span { display:block; color:var(--muted); font-size:11px; line-height:1.5; }
+.payment-status.pass { background:var(--teal-soft); border-color:#b7ddd3; }
+.payment-status.abort { background:var(--red-soft); border-color:#e8b9b5; }
+.payment-status.insufficient { background:var(--amber-soft); border-color:#e6d4a5; }
+.payment-action { margin:0 20px 20px; width:auto; }
+@media(max-width:1000px) { .layout { grid-template-columns:1fr; } .controls-grid { display:grid; grid-template-columns:1fr 1fr; gap:0 18px; } .metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:650px) { .hero { align-items:flex-start; flex-direction:column; } .run-state { width:100%; } .controls-grid { grid-template-columns:1fr; } .bottom-grid { grid-template-columns:1fr; } .flow { grid-template-columns:1fr; } .arrow { transform:rotate(90deg); line-height:15px; } .bits { grid-template-columns:repeat(8,minmax(0,1fr)); } .top-meta { display:none; } .sim-top { flex-direction:column; } }
+@media(prefers-color-scheme:dark) {
+ body { color-scheme:dark; }
+ #app { --site-background:#101b20; --site-on-background:#e5eeee; --ink:#e0ebeb; --muted:#9bb0b3; --line:#2b4147; --surface:#17262c; --teal-soft:#183b38; --red-soft:#442b2b; --amber-soft:#403722; }
+ h1,.metric .value { color:#e6f0f0; }
+ .panel-head { border-color:#26383d; }
+ .field select,.secondary-btn,.node,.bit-track,.bit { background:#1a2b31; color:#e0ebeb; border-color:#33494e; }
+ .toggle-row,.log-item { border-color:#26383d; }
+ .gauge { background:#2a3b3f; }
+ .decision p { color:#c2d0d0; }
+ .bit.match { background:#1b3c38; border-color:#35675d; }
+ .bit.error { background:#482b2b; border-color:#754141; color:#ffc3bd; }
+ .bit.discard { background:#273438; }
+ .run-state,.metric { background:var(--surface); border-color:var(--line); }
+.payment-amount { color:#e6f0f0; }
+.payment-status { background:#1a2b31; border-color:#33494e; }
+ .bit-track { background:#142329; }
+ .node { background:#1a2b31; }
+}
+</style>
+</head>
+<body>
+<div id="app" data-sites-preview-theme="custom">
+  <header class="topbar">
+    <div class="brand"><div class="brandmark">Q</div><span>QORVEX</span></div>
+    <div class="top-meta"><span class="live-dot"></span> QUANTUM SECURITY LAB <span style="opacity:.45">/</span> BB84 PROTOCOL SIMULATOR</div>
+  </header>
+  <main class="shell">
+    <section class="hero">
+      <div><div class="eyebrow">Interactive simulation environment</div><h1>See the attack.<br>Measure the disturbance.</h1><p class="subtitle">Explore how the BB84 key exchange responds to interception and channel noise. Change the conditions, run the simulation, and inspect the bit-level results.</p></div>
+      <div class="run-state"><small>Simulation status</small><div class="state-line"><i class="state-pill" id="stateDot"></i><span id="stateText">Ready to initialize</span></div></div>
+    </section>
+    <div class="layout">
+      <aside class="panel">
+        <div class="panel-head"><div class="panel-title">Experiment controls</div><span class="panel-kicker">CONFIG 01</span></div>
+        <div class="controls"><div class="controls-grid">
+          <div class="field"><label for="scenario">Scenario preset</label><select id="scenario"><option value="clean">01 — Clean channel</option><option value="eve">02 — Eve intercept-resend</option><option value="noise">03 — Noisy channel</option><option value="combined">04 — Eve + channel noise</option></select><div class="help">Presets set realistic demo conditions. You can still adjust the controls below.</div></div>
+          <div class="field"><label for="bitsCount">Transmission size</label><select id="bitsCount"><option value="16">16 bits — quick view</option><option value="32" selected>32 bits — balanced</option><option value="64">64 bits — extended</option></select></div>
+          <div class="toggle-row"><div class="toggle-copy"><strong>Enable Eve</strong><span>Simulate intercept-resend attack</span></div><input class="switch" id="eve" type="checkbox" aria-label="Enable Eve" /></div>
+          <div class="toggle-row"><div class="toggle-copy"><strong>Channel noise</strong><span>Model random transmission errors</span></div><input class="switch" id="noise" type="checkbox" aria-label="Enable channel noise" /></div>
+          <div class="field" style="margin-top:18px"><div class="range-row"><label for="noiseLevel">Noise probability</label><output id="noiseOut">5%</output></div><input id="noiseLevel" type="range" min="0" max="30" step="1" value="5" /><div class="help">Applied only when channel noise is enabled.</div></div>
+          <div class="field"><div class="range-row"><label for="threshold">QBER threshold</label><output id="thresholdOut">11%</output></div><input id="threshold" type="range" min="5" max="25" step="1" value="11" /><div class="help">Illustrative configurable threshold for this demo, not a universal BB84 setting.</div></div>
+        </div>
+        <button class="primary-btn" id="runBtn">▶ &nbsp; Run key exchange</button>
+        <button class="secondary-btn" id="resetBtn" style="width:100%;margin-top:9px">Reset experiment</button>
+      </div>
+      </aside>
+      <section class="maincol">
+        <div class="metrics">
+          <div class="metric"><div class="label">Bits transmitted</div><div class="value" id="mBits">—</div><div class="note">Initial quantum-state preparations</div></div>
+          <div class="metric"><div class="label">Sifted key bits</div><div class="value" id="mSifted">—</div><div class="note">Matching basis positions</div></div>
+          <div class="metric"><div class="label">Sample checked</div><div class="value" id="mSample">—</div><div class="note">Test bits excluded from key</div></div>
+          <div class="metric"><div class="label">Key candidates</div><div class="value" id="mKey">—</div><div class="note">Before full post-processing</div></div>
+        </div>
+        <div class="panel sim-panel">
+          <div class="sim-top"><div><h2>Communication pathway</h2><p>Follow the simulated exchange from sender to receiver.</p></div><div class="legend"><span><i style="background:#4f9c91"></i>Normal flow</span><span><i style="background:#b94c4c"></i>Attack / error</span></div></div>
+          <div class="flow">
+            <div class="node"><div class="node-icon">◈</div><strong>Alice · Sender</strong><small>Random bits + preparation bases</small></div><div class="arrow" id="arrow1">⟶</div>
+            <div class="node" id="channelNode"><div class="node-icon">⌁</div><strong>Quantum channel</strong><small id="channelDesc">No active interception</small></div><div class="arrow" id="arrow2">⟶</div>
+            <div class="node"><div class="node-icon">◉</div><strong>Bob · Receiver</strong><small>Random bases + measurements</small></div>
+          </div>
+          <div class="bit-track"><div class="track-head"><strong>Bit-level inspection</strong><span id="bitCountLabel">Run a simulation to inspect bits</span></div><div class="bits" id="bitsGrid"><div style="grid-column:1/-1;text-align:center;color:#8b9b9d;font-size:12px;padding:22px 0">Your transmission will appear here.</div></div><div class="track-legend"><span><i style="background:#d7eee7;border:1px solid #b7ddd3"></i>Matched bit</span><span><i style="background:#fae9e7;border:1px solid #e8b9b5"></i>Error detected</span><span><i style="background:#e9ecea;border:1px solid #dce6e5"></i>Discarded basis</span><span><i style="background:#f8f0dc;border:1px solid #d7b66e"></i>Sampled for QBER</span></div></div>
+        </div>
+        <div class="bottom-grid">
+          <div class="panel"><div class="panel-head"><div class="panel-title">QBER analysis</div><span class="panel-kicker">ERROR ESTIMATE</span></div><div class="qber-body"><div class="qber-line"><strong>Measured error rate</strong><span id="qberValue">—</span></div><div class="gauge"><div class="gauge-fill" id="gaugeFill"></div><div class="threshold-mark" id="thresholdMark" style="left:44%"></div></div><div class="gauge-labels"><span>0%</span><span id="thresholdLabel">Threshold: 11%</span><span>50%</span></div><div class="decision insufficient" id="decision"><div class="decision-icon" id="decisionIcon">◌</div><div><strong id="decisionTitle">Awaiting simulation</strong><p id="decisionText">Run a key exchange to calculate the sampled QBER and evaluate the configured threshold.</p></div></div></div></div>
+          <div class="panel"><div class="panel-head"><div class="panel-title">Event log</div><span class="panel-kicker">SESSION TRACE</span></div><div class="log" id="eventLog"><div class="log-item"><span class="log-time">--:--:--</span><i class="log-dot amber"></i><div class="log-copy"><strong>Simulator initialized</strong><span>Choose a scenario and run the key exchange.</span></div></div></div></div>
+        </div>
+      </section>
+    </div>
+    <section class="panel payment-panel">
+      <div class="panel-head"><div><div class="panel-title">Payment verification demo</div><div class="help">See how the QORVEX decision affects a simulated payment flow.</div></div><span class="panel-kicker">DEMO ONLY</span></div>
+      <div class="payment-body">
+        <div><div class="eyebrow">Pending demo transaction</div><div class="payment-amount">₹5,000.00</div><div class="payment-copy">To: Demo Merchant · Reference: QVX-DEMO-001<br>No money moves and no bank is contacted.</div></div>
+        <div class="payment-status" id="paymentStatus"><strong id="paymentStatusTitle">Waiting for key exchange</strong><span id="paymentStatusText">Run the BB84 simulation first. Its result will determine whether this demo flow can continue.</span></div>
+      </div>
+      <button class="primary-btn payment-action" id="paymentBtn">Evaluate demo payment</button>
+    </section>
+    <p class="footnote"><strong>Prototype notice:</strong> This is a classical software model for education and demonstration. It does not use quantum hardware, implement production-grade QKD post-processing, or secure real payments. QBER can reveal disturbance in a modeled exchange, but cannot by itself identify an attacker or prove a transaction is legitimate. A real system requires authenticated classical communication, error correction, privacy amplification, secure key management, and separate payment authentication.</p>
+  </main>
+</div>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  let lastResult = null;
+  const time = () => new Date().toLocaleTimeString([], {hour12:false});
+  const randomBit = () => Math.random() < .5 ? 0 : 1;
+  function log(title, detail, type='normal') {
+    const row = document.createElement('div'); row.className = 'log-item';
+    const dotClass = type === 'red' ? 'red' : type === 'amber' ? 'amber' : '';
+    row.innerHTML = `<span class="log-time">${time()}</span><i class="log-dot ${dotClass}"></i><div class="log-copy"><strong></strong><span></span></div>`;
+    row.querySelector('strong').textContent = title; row.querySelector('.log-copy span').textContent = detail;
+    $('eventLog').prepend(row);
+    while ($('eventLog').children.length > 6) $('eventLog').lastElementChild.remove();
+  }
+  function setStatus(text, color='#9baeb1') { $('stateText').textContent=text; $('stateDot').style.background=color; }
+  function updatePayment(outcome) {
+    const panel=$('paymentStatus');
+    panel.className='payment-status '+(outcome==='PASS'?'pass':outcome==='ABORT'?'abort':'insufficient');
+    if(outcome==='PASS') { $('paymentStatusTitle').textContent='Verification may continue'; $('paymentStatusText').textContent='The demo allows the flow to continue to separate payment-authentication checks. This is not proof the payment is legitimate.'; }
+    else if(outcome==='ABORT') { $('paymentStatusTitle').textContent='Demo payment flow blocked'; $('paymentStatusText').textContent='The simulated exchange failed its QBER check. The demo flow is stopped; further verification is required.'; }
+    else { $('paymentStatusTitle').textContent='Demo payment on hold'; $('paymentStatusText').textContent='There is not enough sample data. Keep the demo flow pending and run a larger exchange or additional checks.'; }
+  }
+  function updatePreset() {
+    const s=$('scenario').value;
+    if(s==='clean'){ $('eve').checked=false; $('noise').checked=false; }
+    if(s==='eve'){ $('eve').checked=true; $('noise').checked=false; }
+    if(s==='noise'){ $('eve').checked=false; $('noise').checked=true; }
+    if(s==='combined'){ $('eve').checked=true; $('noise').checked=true; }
+    $('noiseLevel').disabled=!$('noise').checked;
+  }
+  $('scenario').addEventListener('change', updatePreset);
+  $('eve').addEventListener('change',()=>{ if($('eve').checked && $('scenario').value==='clean') $('scenario').value='eve'; $('noiseLevel').disabled=!$('noise').checked; });
+  $('noise').addEventListener('change',()=>{ $('noiseLevel').disabled=!$('noise').checked; if($('noise').checked && $('scenario').value==='clean') $('scenario').value='noise'; });
+  $('noiseLevel').addEventListener('input',()=> $('noiseOut').textContent=$('noiseLevel').value+'%');
+  $('threshold').addEventListener('input',()=>{ $('thresholdOut').textContent=$('threshold').value+'%'; $('thresholdLabel').textContent='Threshold: '+$('threshold').value+'%'; $('thresholdMark').style.left=(Number($('threshold').value)/50*100)+'%'; });
+  function renderBits(data) {
+    const grid=$('bitsGrid'); grid.innerHTML='';
+    data.forEach((b,i)=>{
+      const el=document.createElement('div'); el.className='bit '+(b.discard?'discard':b.error?'error':'match')+(b.sample?' sample':'');
+      el.innerHTML=`<span>${b.discard?'×':b.bob}</span><small>${String(i+1).padStart(2,'0')}</small>`;
+      el.title=`Position ${i+1}: Alice ${b.alice}, Bob ${b.bob}, ${b.discard?'basis mismatch':b.sample?'QBER sample':b.error?'mismatch':'matched basis'}`;
+      grid.appendChild(el);
+    });
+    $('bitCountLabel').textContent=`${data.length} positions · hover a cell for details`;
+  }
+  function run() {
+    $('runBtn').disabled=true; $('runBtn').textContent='Running simulation…'; setStatus('Exchanging key','#c29a48');
+    const n=Number($('bitsCount').value), eve=$('eve').checked, noise=$('noise').checked, noiseP=Number($('noiseLevel').value)/100, threshold=Number($('threshold').value);
+    const data=[];
+    for(let i=0;i<n;i++) {
+      const alice=randomBit(), aBasis=randomBit(), bBasis=randomBit();
+      let eveBasis=null, measured=alice;
+      if(eve){ eveBasis=randomBit(); if(eveBasis!==aBasis) measured=randomBit(); }
+      let bob=(bBasis===aBasis)?measured:randomBit();
+      if(noise && Math.random()<noiseP) bob=1-bob;
+      data.push({alice,bob,aBasis,bBasis,eveBasis,discard:aBasis!==bBasis,error:aBasis===bBasis&&alice!==bob,sample:false});
+    }
+    const sifted=data.filter(b=>!b.discard);
+    // A random test subset is removed from the candidate key; small samples are explicitly treated as insufficient.
+    const shuffled=[...sifted].sort(()=>Math.random()-.5);
+    const sampleCount=Math.min(shuffled.length,Math.max(1,Math.floor(shuffled.length*.35)));
+    const sampleSet=new Set(shuffled.slice(0,sampleCount)); sampleSet.forEach(b=>b.sample=true);
+    const sample=[...sampleSet]; const errors=sample.filter(b=>b.alice!==b.bob).length;
+    const qber=sample.length ? errors/sample.length*100 : 0;
+    const candidates=sifted.length-sampleCount;
+    let outcome='PASS', reason='The sampled QBER is within the configured threshold. This does not prove the channel is free of attackers.';
+    if(sample.length<5){outcome='INSUFFICIENT DATA';reason='Too few sifted test bits are available for a meaningful security estimate. Run a larger transmission.';}
+    else if(qber>threshold){outcome='ABORT';reason='The sampled QBER exceeds the configured threshold. Reject this simulated key exchange and require further verification.';}
+    lastResult={data,n,eve,noise,noiseP,threshold,sifted:sifted.length,sampleCount,candidates,qber,errors,outcome};
+    updatePayment(outcome);
+    renderBits(data);
+    $('mBits').textContent=n; $('mSifted').textContent=sifted.length; $('mSample').textContent=sampleCount; $('mKey').textContent=Math.max(0,candidates);
+    $('qberValue').textContent=qber.toFixed(1)+'%'; $('gaugeFill').style.width=Math.min(100,qber/50*100)+'%'; $('gaugeFill').style.background=outcome==='ABORT'?'#b94c4c':outcome==='INSUFFICIENT DATA'?'#c29a48':'#4f9c91';
+    $('thresholdMark').style.left=(threshold/50*100)+'%'; $('thresholdLabel').textContent='Threshold: '+threshold+'%';
+    const dec=$('decision'); dec.className='decision '+(outcome==='PASS'?'pass':outcome==='ABORT'?'abort':'insufficient');
+    $('decisionTitle').textContent=outcome; $('decisionText').textContent=reason; $('decisionIcon').textContent=outcome==='PASS'?'✓':outcome==='ABORT'?'!':'◌';
+    $('channelDesc').textContent=eve&&noise?'Eve active · noisy channel':eve?'Eve intercept-resend active':noise?'Noise '+Math.round(noiseP*100)+'% · no attacker':'No active interception';
+    $('arrow1').className='arrow'+(eve?' attack':''); $('arrow2').className='arrow'+(eve?' attack':'');
+    $('channelNode').style.borderColor=eve?'#d99c98':''; $('channelNode').style.background=eve?'#fff6f5':'';
+    setStatus(outcome==='PASS'?'Checks passed':outcome==='ABORT'?'Exchange rejected':'More data needed',outcome==='PASS'?'#4f9c91':outcome==='ABORT'?'#b94c4c':'#c29a48');
+    log('BB84 exchange simulated',`${n} preparations; ${sifted.length} positions retained after basis sifting.`);
+    log('QBER sample evaluated',`${errors} mismatches across ${sampleCount} sampled bits = ${qber.toFixed(1)}%.`,outcome==='ABORT'?'red':outcome==='INSUFFICIENT DATA'?'amber':'normal');
+    log('Security decision: '+outcome,reason,outcome==='ABORT'?'red':outcome==='INSUFFICIENT DATA'?'amber':'normal');
+    $('runBtn').disabled=false; $('runBtn').innerHTML='↻ &nbsp; Run again';
+  }
+  $('runBtn').addEventListener('click',run);
+  $('paymentBtn').addEventListener('click',()=>{
+    if(!lastResult) { $('paymentStatus').className='payment-status insufficient'; $('paymentStatusTitle').textContent='Key exchange required'; $('paymentStatusText').textContent='Run the BB84 simulation first, then evaluate this demo payment.'; log('Payment demo waiting','Run a key exchange before evaluating the demo payment.','amber'); return; }
+    updatePayment(lastResult.outcome);
+    log('Demo payment evaluated',lastResult.outcome==='PASS'?'Verification may continue to separate authentication checks.':lastResult.outcome==='ABORT'?'Simulated payment flow blocked after QBER check.':'Simulated payment held because sample data is insufficient.',lastResult.outcome==='ABORT'?'red':lastResult.outcome==='INSUFFICIENT DATA'?'amber':'normal');
+  });
+  $('resetBtn').addEventListener('click',()=>{
+    $('scenario').value='clean'; $('bitsCount').value='32'; $('noiseLevel').value='5'; $('threshold').value='11'; $('noiseOut').textContent='5%'; $('thresholdOut').textContent='11%'; $('thresholdLabel').textContent='Threshold: 11%'; $('thresholdMark').style.left='22%'; $('eve').checked=false; $('noise').checked=false; $('noiseLevel').disabled=true; $('paymentStatus').className='payment-status'; $('paymentStatusTitle').textContent='Waiting for key exchange'; $('paymentStatusText').textContent='Run the BB84 simulation first. Its result will determine whether this demo flow can continue.';
+    ['mBits','mSifted','mSample','mKey'].forEach(id=>$(id).textContent='—'); $('qberValue').textContent='—'; $('gaugeFill').style.width='0%'; $('decision').className='decision insufficient'; $('decisionTitle').textContent='Awaiting simulation'; $('decisionText').textContent='Run a key exchange to calculate the sampled QBER and evaluate the configured threshold.'; $('decisionIcon').textContent='◌'; $('bitsGrid').innerHTML='<div style="grid-column:1/-1;text-align:center;color:#8b9b9d;font-size:12px;padding:22px 0">Your transmission will appear here.</div>'; $('bitCountLabel').textContent='Run a simulation to inspect bits'; $('channelDesc').textContent='No active interception'; $('channelNode').style.borderColor=''; $('channelNode').style.background=''; $('arrow1').className='arrow'; $('arrow2').className='arrow'; $('eventLog').innerHTML=''; log('Simulator reset','Controls restored to default settings.','amber'); setStatus('Ready to initialize'); $('runBtn').disabled=false; $('runBtn').innerHTML='▶ &nbsp; Run key exchange'; lastResult=null;
+  });
+  updatePreset(); $('noiseLevel').disabled=true;
+})();
+</script>
+
+<!--sites-preview-theme:start-->
+<style data-sites-preview-theme>:root{--site-font-body:system-ui,sans-serif !important}</style>
+<script type="application/json" data-sites-preview-theme>{"appearance":"custom","primary":"#102b3a","secondary":null,"background":"#f3f6f5","typography":"modern","spacing":null,"roundness":null,"headingScale":null,"decorationOpacity":null}</script>
+<!--sites-preview-theme:end-->
+</body>
+</html>

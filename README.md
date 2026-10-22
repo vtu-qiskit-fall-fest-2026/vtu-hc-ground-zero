@@ -1,312 +1,70 @@
-<div align="center">
+# QORVEX — BB84 Interactive Simulation
 
-# Ground Zero
+An **educational** BB84 quantum key distribution simulation with a React/TypeScript frontend and Python/FastAPI/NumPy backend. It does not contact a bank, transfer money, use quantum hardware, perform QKD privacy amplification/error correction, or authenticate real transactions.
 
-**VTU-QFF-HC-0199** &nbsp;|&nbsp; Tier: **Online**
+## Requirements
+- Python 3.10+ (tested with Python 3.13)
+- Node.js 20+ and npm (Node 22 available in the build environment)
+- Network access to npm for the initial `npm install` (not available in the build environment)
 
-</div>
+## Run in Windows PowerShell / VS Code
+Open the `qorvex` folder in VS Code. In terminal 1:
 
----
-
-<div align="center">
-
-| | |
-| :--- | :--- |
-| **Team** | Ground Zero |
-| **Team ID** | VTU-QFF-HC-0199 |
-| **Tier** | Online |
-| **Repository** | [vtu-hc-ground-zero](https://github.com/vtu-qiskit-fall-fest-2026/vtu-hc-ground-zero.git) |
-| **Organisation** | [vtu-qiskit-fall-fest-2026](https://github.com/vtu-qiskit-fall-fest-2026) |
-| **Event** | VTU-QFF Hackathon — VTU-Qiskit Fall Fest 2026 |
-
-</div>
-
----
-
-## 📌 Table of Contents
-
-- [Team Members](#-team-members-github-ids)
-- [Problem Statement](#-problem-statement)
-- [Proposed Solution](#-proposed-solution)
-- [Approach & Architecture](#-approach--architecture)
-- [Tech Stack](#-tech-stack)
-- [Project Structure](#-project-structure)
-- [How to Run](#-how-to-run)
-- [How to Push Code](#-how-to-push-code)
-- [Submission Checklist](#-submission-checklist)
-- [Resources](#-resources)
-- [License](#-license)
-
----
-
-## 👥 Team Members (GitHub IDs)
-
-> Members are added to this repository as **collaborators** and must accept the
-> GitHub invitation before they can push. Add your GitHub username below.
-
-| # | Name | GitHub Username | Role |
-| :-- | :--- | :--- | :--- |
-| 1 | _Add your name_ | _your-github-username_ | _Team Lead_ |
-| 2 | _Add your name_ | _your-github-username_ | _Developer_ |
-| 3 | _Add your name_ | _your-github-username_ | _Developer_ |
-
-<!--
-Optional: add a plain list instead of the table above.
-- @username1
-- @username2
--->
-
----
-
-## ❓ Problem Statement
-
-<!--
-State the problem you are solving. Be specific: what is broken or missing,
-who experiences it, and why does it matter. Link to the official problem
-statement from the brief if one applies.
--->
-
-**Problem:** _Describe the problem in 2–3 sentences._
-
-**Why it matters:** _Explain the impact or opportunity._
-
-**Track / Category:** _Online / Offline · Track 1 / Track 2 · <domain>_
-
----
-
-## 💡 Proposed Solution
-
-<!--
-Describe your solution. Keep it concrete: the core idea, the user flow, and
-the quantum/ML technique you are applying.
--->
-
-**Solution:** _In 2–3 sentences, describe what you built._
-
-**Key idea:** _The one-line technical summary of your approach._
-
-**Why this works:** _How your approach addresses the problem statement._
-
----
-
-## 🧩 Approach & Architecture
-
-<!--
-Walk through how it works. A simple pipeline diagram in text or Mermaid is ideal.
--->
-
-```mermaid
-flowchart LR
-    A[Input Data] --> B[Preprocessing]
-    B --> C[Quantum Circuit / Model]
-    C --> D[Post-processing]
-    D --> E[Output]
-```
-
-1. **Input** — _what data goes in and in what format_
-2. **Preprocessing** — _cleaning, feature extraction, encoding_
-3. **Quantum core** — _the circuit, ansatz, or algorithm used_
-4. **Post-processing** — _decoding, measurement, scoring_
-5. **Output** — _what the user finally gets_
-
----
-
-## 🛠️ Tech Stack
-
-| Layer | Technology |
-| :--- | :--- |
-| Language | Python 3.11+ |
-| Quantum SDK | Qiskit `>=1.0`, Qiskit Aer, Qiskit Runtime |
-| Optimisation | Qiskit Optimization / COBYLA / SPSA |
-| Simulation | AerSimulator (statevector / noisemodel) |
-| Environment | JupyterLab / VS Code, `venv` |
-| Version control | Git + GitHub |
-
----
-
-## 📁 Project Structure
-
-```text
-vtu-hc-ground-zero/
-├── README.md              # This file
-├── requirements.txt       # Python dependencies
-├── pyproject.toml         # Project metadata (optional)
-├── .gitignore
-├── notebooks/             # Jupyter notebooks for experiments
-│   └── exploration.ipynb
-├── src/
-│   ├── __init__.py
-│   ├── circuit.py         # Quantum circuit construction
-│   ├── optimizer.py       # Optimization loop
-│   └── main.py            # Entry point
-├── data/                  # Datasets (use Git LFS for large files)
-├── tests/                 # Unit tests
-│   └── test_circuit.py
-└── docs/                  # Notes, diagrams, reports
-```
-
----
-
-## 🚀 How to Run
-
-### Prerequisites
-
-- Python 3.11 or newer
-- [Git](https://git-scm.com/downloads)
-- A GitHub account (you need collaborator access to this repo)
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/vtu-qiskit-fall-fest-2026/vtu-hc-ground-zero.git
-cd vtu-hc-ground-zero
-```
-
-### 2. Create a virtual environment
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate        # Linux / macOS
-# .venv\Scripts\activate         # Windows (PowerShell)
-```
-
-### 3. Install dependencies
-
-```bash
-pip install --upgrade pip
+```powershell
+cd backend
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
+python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-### 4. Run
+Backend health: http://127.0.0.1:8000/api/health
+Interactive API docs: http://127.0.0.1:8000/docs
 
-```bash
-python -m src.main
+In terminal 2:
+
+```powershell
+cd frontend
+npm install
+npm run dev
 ```
 
-Or launch the notebook workflow:
+Frontend: http://127.0.0.1:5173
 
-```bash
-jupyter lab
+Optional: copy `frontend/.env.example` to `frontend/.env` and change `VITE_API_BASE_URL`.
+
+## Tests / build
+```powershell
+cd backend
+python -m pytest -q
+cd ..\frontend
+npm run build
 ```
 
-### 5. Run the tests
+## Backend API
+- `GET /api/health`: health/version.
+- `POST /api/simulations`: JSON with `bits`, `eve`, `noise`, `noise_probability` (fraction), `threshold` (percentage), optional `seed`, `sample_fraction`, `min_sample`. Returns bit-level trace, sifted counts, sampled mismatches, sampled QBER, threshold and decision.
+- `GET /api/simulations/{id}`: retrieve one of the most recent 100 in-memory sessions.
+- `POST /api/payments/demo/verify`: requires `simulation_id`, optional mock payment metadata; returns a demo-only gate status, never authorizes or transfers funds.
 
-```bash
-pytest -q
-```
+## Assumptions / boundaries
+- Alice, Bob and Eve select random bases; with Eve intercept-resend in an ideal channel, expected sifted QBER tends toward 25% for large samples.
+- Public basis reconciliation is modeled, not cryptographically authenticated.
+- A random disclosed fraction (default 35%) of sifted bits is used to estimate QBER. Those disclosed sample bits are not counted as candidates for future key material.
+- `INSUFFICIENT_DATA`: fewer than 5 test bits by default. `ABORT`: sufficient sample but QBER strictly greater than configured threshold. Otherwise `PASS` refers **only** to the toy security policy.
+- Noise flips Bob's measured bits according to a user-set Bernoulli probability; this is a simplified classical noise model.
+- No real key derivation, error correction, privacy amplification, authenticated classical messaging, fraud detection or real payment verification.
+- The frontend's bit-inspection rendering is capped at the first 128 positions; backend calculation uses the full sequence.
+- The brand logo shown is a pixel crop from the supplied brand guide because a separate transparent/vector logo asset was not provided. No alternative logo was invented. Brand colors follow the guide; fonts use Inter and IBM Plex Mono from Google Fonts, with graceful fallback offline.
+- API in-memory sessions are erased when the server stops. CORS is limited to local development origins.
 
----
+## Troubleshooting
+- `Failed to fetch` in the UI: start FastAPI, verify `/api/health`, and check frontend `.env`.
+- Browser shows CORS issue: launch the frontend from `http://127.0.0.1:5173` or `http://localhost:5173`.
+- PowerShell blocks virtualenv activation: use `Set-ExecutionPolicy -Scope Process Bypass` in that terminal.
+- `npm install` requires npm registry connectivity; if offline, connect once and retry.
 
-## 🔁 How to Push Code
-
-> Full walkthrough: **[Git & Collaboration Handbook](../vtu-hc-guide-git-and-collaboration)** — collaboration
-> workflow, branches, pull requests, reviews and conflict resolution.
-
-### Configure Git (first time only)
-
-```bash
-git config --global user.name  "Your Name"
-git config --global user.email "you@example.com"
-```
-
-### Everyday workflow
-
-```bash
-# 1. Get the latest changes
-git checkout main
-git pull origin main
-
-# 2. Create a branch for your work
-git checkout -b feature/my-task
-
-# 3. Commit your work
-git add .
-git commit -m "feat: add variational circuit for the search problem"
-
-# 4. Push the branch
-git push -u origin feature/my-task
-
-# 5. Open a Pull Request on GitHub and request a review
-#    https://github.com/vtu-qiskit-fall-fest-2026/vtu-hc-ground-zero/compare/main...feature/my-task
-
-# 6. After approval, merge into main
-git checkout main
-git pull origin main
-git branch -d feature/my-task
-```
-
-### Commit message convention
-
-| Prefix | Meaning |
-| :--- | :--- |
-| `feat:` | New feature |
-| `fix:` | Bug fix |
-| `docs:` | Documentation only |
-| `test:` | Adding or fixing tests |
-| `refactor:` | Code restructure, no behaviour change |
-| `chore:` | Build/config/dependency changes |
-
-### Useful commands
-
-```bash
-git status              # what changed
-git log --oneline -10   # recent commits
-git diff                # review changes before committing
-git stash               # shelve changes temporarily
-git pull --rebase       # update your branch on top of main
-```
-
-### Collaborating on the same repo
-
-- **Never push directly to `main`** — open a Pull Request.
-- **Pull before you push** to avoid rejected commits.
-- **Commit often** with clear messages.
-- **Resolve conflicts** locally: `git pull --rebase`, fix the files, then `git add` + `git rebase --continue`.
-- **Ask for a review** before merging — a second pair of eyes catches bugs fast.
-
----
-
-## ✅ Submission Checklist
-
-- [ ] Repository created and **public**
-- [ ] All team members added as **collaborators** and invitations accepted
-- [ ] `README.md` updated with project details, problem statement and solution
-- [ ] Team members listed under [Team Members](#-team-members-github-ids)
-- [ ] `requirements.txt` committed and project runs from a clean clone
-- [ ] Code pushed to `main` and the latest `main` builds successfully
-- [ ] Notebooks committed with **cleared outputs** (or use `nbstrip`)
-- [ ] `README` includes a demo screenshot / video link
-- [ ] Short project summary submitted on the hackathon portal
-
----
-
-## 📚 Resources
-
-| Resource | Link |
-| :--- | :--- |
-| 🔁 Git & collaboration handbook | [Git & Collaboration Handbook](../vtu-hc-guide-git-and-collaboration) |
-| ❓ Problem statements, solutions & terms | [Problem Statements, Solutions & Terms](../vtu-hc-guide-problem-and-solution) |
-| 📄 README writing guide | [README Guide & Template](../vtu-hc-guide-readme-template) |
-| ⚛️ Qiskit documentation | https://docs.quantum.ibm.com/ |
-| ⚛️ Qiskit Runtime & primitives | https://quantum.cloud.ibm.com/docs/ |
-| 🧪 Qiskit Aer simulator | https://docs.quantum.ibm.com/guides/simulator |
-| 💻 IBM Quantum Platform | https://quantum.cloud.ibm.com/ |
-| 🎓 Qiskit textbook | https://qiskit.qotlabs.org/learning/ |
-| 📋 GitHub Docs | https://docs.github.com/ |
-
----
-
-## 📄 License
-
-Released under the [MIT License](LICENSE). See `LICENSE` for details.
-
----
-
-<div align="center">
-
-**Ground Zero** · Team ID `VTU-QFF-HC-0199` · Tier `Online`
-· Built with ⚛️ Qiskit for the VTU-QFF Hackathon
-
-[⬆ Back to Top](#ground-zero)
-
-</div>
+## Verification performed in creation environment
+- `python -m pytest -q` in `backend`: **11 passed**.
+- `npm install --offline --no-audit --no-fund` in `frontend`: **failed** (`ENOTCACHED`, React typing packages not cached).
+- Frontend build **not executed** because npm dependencies were unavailable; verify with `npm install && npm run build` on a network-connected machine.
